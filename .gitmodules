@@ -1,0 +1,3 @@
+[submodule "assets_sub"]
+	path = assets_sub
+	url = https://github.com/FunkinCrew/Funkin.assets
