@@ -3,19 +3,44 @@
 <head>
 	<meta charset="utf-8">
 	<title>Friday Night Funkin'</title>
-	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="theme-color" content="#000000">
 	<link rel="shortcut icon" type="image/png" href="./favicon.png">
 	<script>
-		window.addEventListener("touchmove", function(event) { event.preventDefault(); }, { capture: false, passive: false });
-		if (typeof window.devicePixelRatio !== "undefined" && window.devicePixelRatio > 2) {
-			var meta = document.getElementById("viewport");
-			meta.setAttribute("content", "width=device-width, initial-scale=" + (2 / window.devicePixelRatio) + ", user-scalable=no");
-		}
+		(function setupMobileViewport() {
+			window.addEventListener("touchmove", function(event) { event.preventDefault(); }, { capture: false, passive: false });
+			window.addEventListener("gesturestart", function(event) { event.preventDefault(); }, { passive: false });
+			window.addEventListener("gesturechange", function(event) { event.preventDefault(); }, { passive: false });
+			window.addEventListener("gestureend", function(event) { event.preventDefault(); }, { passive: false });
+			if (typeof window.devicePixelRatio !== "undefined" && window.devicePixelRatio > 2) {
+				var meta = document.getElementById("viewport");
+				meta.setAttribute("content", "width=device-width, initial-scale=" + (2 / window.devicePixelRatio) + ", maximum-scale=1.0, user-scalable=no, viewport-fit=cover");
+			}
+		})();
 	</script>
 	<style>
-		html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-		#openfl-content { background: #000; width: 100%; height: 100%; }
+		html, body {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			overflow: hidden;
+			touch-action: none;
+			overscroll-behavior: none;
+			-webkit-user-select: none;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+			background: #000;
+		}
+		#openfl-content {
+			background: #000;
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			inset: 0;
+		}
 		@font-face {
 			font-family: 'Pixel Arial 11 Bold';
 			src: url('assets/fonts/pixel.otf') format('truetype');
@@ -47,7 +72,18 @@
 	<div id="openfl-content"></div>
 	<script src="./PsychEngine.js"></script>
 	<script>
-		lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
+		(function bootGame() {
+			lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
+			var syncCanvasSize = function() {
+				window.scrollTo(0, 0);
+				var content = document.getElementById("openfl-content");
+				content.style.width = window.innerWidth + "px";
+				content.style.height = window.innerHeight + "px";
+			};
+			window.addEventListener("resize", syncCanvasSize);
+			window.addEventListener("orientationchange", syncCanvasSize);
+			syncCanvasSize();
+		})();
 	</script>
 </body>
 </html>
