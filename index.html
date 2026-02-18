@@ -40,14 +40,39 @@
 			font-weight: normal;
 			font-style: normal;
 		}
+		html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+		#openfl-content {
+			background: #000;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font: 16px/1.4 sans-serif;
+		}
 	</style>
 </head>
 <body>
-	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript>
+	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript＞
 	<div id="openfl-content"></div>
 	<script src="./PsychEngine.js"></script>
 	<script>
 		lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
+	<div id="openfl-content">Loading…</div>
+	<script>
+		(function loadGameScript() {
+			var gameScript = document.createElement("script");
+			gameScript.src = "./PsychEngine.js";
+			gameScript.onload = function() {
+				document.getElementById("openfl-content").textContent = "";
+				lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
+			};
+			gameScript.onerror = function() {
+				document.getElementById("openfl-content").textContent = "Failed to load game resources.";
+			};
+			document.body.appendChild(gameScript);
+		})();
 	</script>
 </body>
 </html>
