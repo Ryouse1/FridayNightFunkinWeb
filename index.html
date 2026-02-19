@@ -11,6 +11,10 @@
 	<link rel="shortcut icon" type="image/png" href="./favicon.png">
 	<script>
 		window.addEventListener("touchmove", function(event) { event.preventDefault(); }, { capture: false, passive: false });
+		if (typeof window.devicePixelRatio !== "undefined" && window.devicePixelRatio > 2) {
+			var meta = document.getElementById("viewport");
+			meta.setAttribute("content", "width=device-width, initial-scale=" + (2 / window.devicePixelRatio) + ", user-scalable=no");
+		}
 	</script>
 	<style>
 		html, body { 
@@ -18,120 +22,55 @@
 			padding: 0; 
 			height: 100%; 
 			overflow: hidden;
-			background: #000;
 			-webkit-tap-highlight-color: transparent;
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
 			user-select: none;
 		}
 		#openfl-content { 
+			background: #000; 
 			width: 100%; 
 			height: 100%;
 			position: fixed;
 			top: 0;
 			left: 0;
-			z-index: 1;
 		}
 		canvas {
 			display: block;
 			margin: 0 auto;
 			max-width: 100%;
 			max-height: 100%;
-			image-rendering: pixelated;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: crisp-edges;
 		}
-
-		/* モバイルUIオーバーレイ */
-		#mobile-controls {
-			position: fixed;
-			bottom: 20px;
-			left: 0;
-			width: 100%;
-			display: none;
-			justify-content: space-between;
-			padding: 0 20px;
-			box-sizing: border-box;
-			z-index: 100;
-			pointer-events: none;
+		@font-face {
+			font-family: 'Pixel Arial 11 Bold';
+			src: url('assets/fonts/pixel.otf') format('opentype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
 		}
-		.d-pad, .action-buttons {
-			display: flex;
-			pointer-events: auto;
+		@font-face {
+			font-family: 'VCR OSD Mono';
+			src: url('assets/fonts/vcr.ttf') format('truetype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
 		}
-		.control-btn {
-			width: 60px;
-			height: 60px;
-			background: rgba(255, 255, 255, 0.3);
-			border: 2px solid #fff;
-			border-radius: 10px;
-			margin: 5px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			color: #fff;
-			font-weight: bold;
-			font-family: 'VCR OSD Mono', Arial, sans-serif;
-			user-select: none;
-			touch-action: manipulation;
+		@font-face {
+			font-family: 'Nokia Cellphone FC Small';
+			src: url('flixel/fonts/nokiafc22.ttf') format('truetype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
 		}
-		.control-btn:active {
-			background: rgba(255, 255, 255, 0.6);
+		@font-face {
+			font-family: 'Monsterrat';
+			src: url('flixel/fonts/monsterrat.ttf') format('truetype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
 		}
-
-		/* メインメニュー用ボタン */
-		#menu-overlay {
-			position: fixed;
-			top: 20px;
-			left: 50%;
-			transform: translateX(-50%);
-			display: none;
-			flex-direction: row;
-			flex-wrap: wrap;
-			justify-content: center;
-			align-items: center;
-			z-index: 200;
-			width: 90%;
-		}
-		.menu-btn {
-			padding: 10px 20px;
-			margin: 5px;
-			background: #ff7800;
-			border: 3px solid #fff;
-			color: #fff;
-			font-family: 'VCR OSD Mono', Arial, sans-serif;
-			font-size: 16px;
-			text-align: center;
-			border-radius: 10px;
-			box-shadow: 0 4px 0 #a54e00;
-			cursor: pointer;
-			pointer-events: auto;
-		}
-		.menu-btn:active {
-			transform: translateY(2px);
-			box-shadow: 0 2px 0 #a54e00;
-		}
-
-		/* 停止ボタン */
-		#stop-btn {
-			position: fixed;
-			top: 10px;
-			right: 10px;
-			width: 60px;
-			height: 60px;
-			background: rgba(255, 0, 0, 0.6);
-			border: 3px solid #fff;
-			border-radius: 50%;
-			display: none;
-			justify-content: center;
-			align-items: center;
-			color: #fff;
-			font-size: 24px;
-			font-family: 'VCR OSD Mono', Arial, sans-serif;
-			font-weight: bold;
-			z-index: 300;
-			cursor: pointer;
-			touch-action: manipulation;
-		}
-
 		#loading {
 			position: fixed;
 			top: 0;
@@ -146,119 +85,69 @@
 			font-family: Arial, sans-serif;
 			z-index: 9999;
 		}
+		/* モバイル用エディタ呼び出しボタン（最小限） */
+		#editor-btn {
+			position: fixed;
+			top: 5px;
+			left: 5px;
+			padding: 8px 12px;
+			background: rgba(0, 0, 0, 0.4);
+			color: rgba(255, 255, 255, 0.7);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			border-radius: 4px;
+			font-family: 'VCR OSD Mono', sans-serif;
+			font-size: 12px;
+			z-index: 1000;
+			cursor: pointer;
+			display: none;
+			touch-action: manipulation;
+		}
+		#editor-btn:active {
+			background: rgba(255, 255, 255, 0.3);
+		}
 	</style>
 </head>
 <body>
+	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript>
 	<div id="loading">Loading...</div>
+	<div id="editor-btn">EDITOR (E)</div>
 	<div id="openfl-content"></div>
-
-	<!-- モバイルコントロール -->
-	<div id="mobile-controls">
-		<div class="d-pad">
-			<div class="control-btn" id="btn-left">←</div>
-			<div style="display: flex; flex-direction: column;">
-				<div class="control-btn" id="btn-up">↑</div>
-				<div class="control-btn" id="btn-down">↓</div>
-			</div>
-			<div class="control-btn" id="btn-right">→</div>
-		</div>
-		<div class="action-buttons">
-			<div class="control-btn" id="btn-enter" style="width: 80px;">ENTER</div>
-			<div class="control-btn" id="btn-esc" style="width: 80px;">ESC</div>
-		</div>
-	</div>
-
-	<!-- メインメニューボタン -->
-	<div id="menu-overlay">
-		<div class="menu-btn" onclick="handleMenuClick('up')">UP</div>
-		<div class="menu-btn" onclick="handleMenuClick('down')">DOWN</div>
-		<div class="menu-btn" onclick="handleMenuClick('enter')">SELECT</div>
-		<div class="menu-btn" onclick="toggleMenu()">HIDE MENU</div>
-	</div>
-
-	<!-- 停止ボタン -->
-	<div id="stop-btn" onclick="togglePause()">II</div>
-	<div id="show-menu-btn" style="position:fixed; top:10px; left:10px; display:none; background:rgba(255,120,0,0.7); color:#fff; padding:15px 20px; border: 2px solid #fff; border-radius:10px; z-index:300; font-family: 'VCR OSD Mono', sans-serif; font-weight: bold;" onclick="toggleMenu()">MENU</div>
-
 	<script src="./PsychEngine.js" defer></script>
 	<script>
-		// キー入力シミュレーション
-		function simulateKey(keyCode, type = 'keydown') {
-			const event = new KeyboardEvent(type, {
+		function pressKey(keyCode) {
+			const options = {
 				keyCode: keyCode,
 				which: keyCode,
 				bubbles: true,
 				cancelable: true
-			});
-			window.dispatchEvent(event);
-			// 仮想キャンバスへの通知（一部のエンジンで必要）
+			};
+			const down = new KeyboardEvent('keydown', options);
+			const up = new KeyboardEvent('keyup', options);
+			window.dispatchEvent(down);
+			setTimeout(() => window.dispatchEvent(up), 50);
+			
+			// 一部のブラウザ/エンジン向けにcanvasにも直接送る
 			const canvas = document.querySelector('canvas');
 			if (canvas) {
-				canvas.dispatchEvent(event);
+				canvas.dispatchEvent(new KeyboardEvent('keydown', options));
+				setTimeout(() => canvas.dispatchEvent(new KeyboardEvent('keyup', options)), 50);
 			}
-		}
-
-		function setupMobileControls() {
-			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (window.innerWidth <= 800);
-			
-			if (isMobile) {
-				document.getElementById('mobile-controls').style.display = 'flex';
-				document.getElementById('stop-btn').style.display = 'flex';
-				
-				const buttons = {
-					'btn-left': 37,
-					'btn-up': 38,
-					'btn-down': 40,
-					'btn-right': 39,
-					'btn-enter': 13,
-					'btn-esc': 27
-				};
-
-				for (let id in buttons) {
-					const btn = document.getElementById(id);
-					const code = buttons[id];
-					
-					btn.addEventListener('touchstart', (e) => {
-						e.preventDefault();
-						simulateKey(code, 'keydown');
-					});
-					
-					btn.addEventListener('touchend', (e) => {
-						e.preventDefault();
-						simulateKey(code, 'keyup');
-					});
-				}
-
-				document.getElementById('show-menu-btn').style.display = 'block';
-				document.getElementById('menu-overlay').style.display = 'flex';
-			}
-		}
-
-		function toggleMenu() {
-			const menu = document.getElementById('menu-overlay');
-			if (menu.style.display === 'none' || menu.style.display === '') {
-				menu.style.display = 'flex';
-			} else {
-				menu.style.display = 'none';
-			}
-		}
-
-		function handleMenuClick(action) {
-			const keys = { 'up': 38, 'down': 40, 'enter': 13 };
-			simulateKey(keys[action], 'keydown');
-			setTimeout(() => simulateKey(keys[action], 'keyup'), 50);
-		}
-
-		// 停止ボタン（ポーズメニュー呼び出し）
-		function togglePause() {
-			simulateKey(27, 'keydown');
-			setTimeout(() => simulateKey(27, 'keyup'), 50);
 		}
 
 		window.addEventListener('load', function() {
 			document.getElementById('loading').style.display = 'none';
 			lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
-			setupMobileControls();
+			
+			const editorBtn = document.getElementById('editor-btn');
+			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 800;
+			
+			if (isMobile) {
+				editorBtn.style.display = 'block';
+				editorBtn.addEventListener('touchstart', function(e) {
+					e.preventDefault();
+					pressKey(69); // E key
+				});
+			}
 		});
 	</script>
 </body>
