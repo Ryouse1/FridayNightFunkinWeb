@@ -64,30 +64,9 @@
 			flex-wrap: wrap;
 		}
 
-		/* 十字キー（左側） */
-		#dpad-panel {
-			bottom: 40px;
-			left: 30px;
-			width: 190px;
-			height: 190px;
-		}
-
-		/* アクションボタン（右側） */
-		#action-panel {
-			bottom: 40px;
-			right: 30px;
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 10px;
-		}
-
-		/* 特殊キー（上部） */
-		#special-panel {
-			top: 15px;
-			left: 15px;
-			display: flex;
-			gap: 12px;
-		}
+		#dpad-panel { bottom: 40px; left: 30px; width: 190px; height: 190px; }
+		#action-panel { bottom: 40px; right: 30px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+		#special-panel { top: 15px; left: 15px; display: flex; gap: 12px; }
 
 		.v-key {
 			background: rgba(255, 255, 255, 0.15);
@@ -104,32 +83,120 @@
 			transition: background 0.1s, transform 0.05s;
 		}
 
-		.v-key:active {
-			background: rgba(255, 255, 255, 0.4);
-			transform: scale(0.95);
-		}
+		.v-key:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
 
-		/* 十字キーの個別配置 */
 		.d-key { width: 55px; height: 55px; position: absolute; }
 		#key-up { top: 0; left: 60px; }
 		#key-down { bottom: 0; left: 60px; }
 		#key-left { top: 60px; left: 0; }
 		#key-right { top: 60px; right: 0; }
 
-		/* アクションボタンのスタイル */
-		.a-key { 
-			width: 85px; 
-			height: 60px; 
-			font-size: 13px;
-			background: rgba(255, 255, 255, 0.1);
+		.a-key { width: 85px; height: 60px; font-size: 13px; background: rgba(255, 255, 255, 0.1); }
+		.s-key { padding: 8px 15px; font-size: 12px; background: rgba(0, 0, 0, 0.5); }
+
+		/* Mod Editor GUI */
+		#mod-editor-gui {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 90%;
+			max-width: 600px;
+			height: 80%;
+			background: rgba(20, 20, 20, 0.95);
+			border: 4px solid #ff7800;
+			border-radius: 20px;
+			z-index: 2000;
+			display: none;
+			flex-direction: column;
+			padding: 20px;
+			color: #fff;
+			font-family: 'VCR OSD Mono', sans-serif;
+			pointer-events: auto;
 		}
 
-		/* 特殊ボタン（Eキーなど） */
-		.s-key {
-			padding: 8px 15px;
-			font-size: 12px;
-			background: rgba(0, 0, 0, 0.5);
+		.editor-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			border-bottom: 2px solid #ff7800;
+			padding-bottom: 10px;
 		}
+
+		.editor-tabs {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+
+		.tab-btn {
+			padding: 10px 15px;
+			background: #333;
+			border: none;
+			color: #fff;
+			border-radius: 8px;
+			cursor: pointer;
+		}
+
+		.tab-btn.active { background: #ff7800; }
+
+		.editor-content {
+			flex: 1;
+			overflow-y: auto;
+			padding-right: 10px;
+		}
+
+		.editor-section { display: none; }
+		.editor-section.active { display: block; }
+
+		.editor-item {
+			margin-bottom: 15px;
+			background: rgba(255, 255, 255, 0.05);
+			padding: 10px;
+			border-radius: 10px;
+		}
+
+		.editor-item label { display: block; margin-bottom: 5px; color: #ff7800; font-size: 14px; }
+		.editor-item input, .editor-item select {
+			width: 100%;
+			padding: 8px;
+			background: #222;
+			border: 1px solid #444;
+			color: #fff;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+
+		.editor-footer {
+			margin-top: 20px;
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+		}
+
+		.save-btn { background: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+		.close-btn { background: #dc3545; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+
+		/* ノーツ編集用グリッド（簡易） */
+		.notes-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 5px;
+			margin-top: 10px;
+		}
+		.note-cell {
+			height: 40px;
+			background: #333;
+			border: 1px solid #444;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 10px;
+			cursor: pointer;
+		}
+		.note-cell.active { background: #ff7800; }
+		.note-cell.hold { background: #007bff; }
 
 		#loading {
 			position: fixed;
@@ -152,25 +219,92 @@
 	
 	<!-- 仮想キーボードGUI -->
 	<div id="mobile-gui">
-		<!-- 左側：十字キー -->
 		<div id="dpad-panel" class="gui-panel">
 			<div class="v-key d-key" id="key-up" data-code="38">↑</div>
 			<div class="v-key d-key" id="key-down" data-code="40">↓</div>
 			<div class="v-key d-key" id="key-left" data-code="37">←</div>
 			<div class="v-key d-key" id="key-right" data-code="39">→</div>
 		</div>
-
-		<!-- 右側：決定・キャンセル -->
 		<div id="action-panel" class="gui-panel">
 			<div class="v-key a-key" id="key-enter" data-code="13">ENTER</div>
 			<div class="v-key a-key" id="key-esc" data-code="27">ESC</div>
 			<div class="v-key a-key" id="key-shift" data-code="16">SHIFT</div>
 			<div class="v-key a-key" id="key-space" data-code="32">SPACE</div>
 		</div>
-
-		<!-- 上部：特殊キー -->
 		<div id="special-panel" class="gui-panel">
-			<div class="v-key s-key" id="key-e" data-code="69">EDITOR (E)</div>
+			<div class="v-key s-key" onclick="toggleModEditor()">MOD EDITOR (E)</div>
+		</div>
+	</div>
+
+	<!-- Mod Editor GUI -->
+	<div id="mod-editor-gui">
+		<div class="editor-header">
+			<h2>MOD EDITOR</h2>
+			<span style="font-size: 12px; color: #aaa;">v1.0 (Mobile)</span>
+		</div>
+		<div class="editor-tabs">
+			<button class="tab-btn active" onclick="switchTab('notes')">NOTES</button>
+			<button class="tab-btn" onclick="switchTab('song')">SONG</button>
+			<button class="tab-btn" onclick="switchTab('character')">CHARACTER</button>
+		</div>
+		<div class="editor-content">
+			<!-- ノーツ編集 -->
+			<div id="section-notes" class="editor-section active">
+				<div class="editor-item">
+					<label>Section Selection</label>
+					<input type="number" value="0" min="0" id="note-section">
+				</div>
+				<div class="editor-item">
+					<label>Note Type</label>
+					<select id="note-type" onchange="updateNoteType(this.value)">
+						<option value="normal">Normal Note</option>
+						<option value="hold">Hold Note</option>
+					</select>
+				</div>
+				<div class="editor-item">
+					<label>Quick Grid (Tap to Place)</label>
+					<div id="notes-grid-container" class="notes-grid">
+						<!-- JavaScript will generate grid -->
+					</div>
+				</div>
+			</div>
+			<!-- 楽曲編集 -->
+			<div id="section-song" class="editor-section">
+				<div class="editor-item">
+					<label>Song Name</label>
+					<input type="text" value="Bopeebo" id="song-name">
+				</div>
+				<div class="editor-item">
+					<label>BPM</label>
+					<input type="number" value="100" id="song-bpm">
+				</div>
+				<div class="editor-item">
+					<label>Scroll Speed</label>
+					<input type="number" value="2.0" step="0.1" id="song-speed">
+				</div>
+			</div>
+			<!-- キャラクター編集 -->
+			<div id="section-character" class="editor-section">
+				<div class="editor-item">
+					<label>Player Character</label>
+					<select id="char-player">
+						<option value="bf">Boyfriend</option>
+						<option value="bf-pixel">BF Pixel</option>
+					</select>
+				</div>
+				<div class="editor-item">
+					<label>Opponent Character</label>
+					<select id="char-opponent">
+						<option value="dad">Dad</option>
+						<option value="pico">Pico</option>
+						<option value="mom">Mom</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="editor-footer">
+			<button class="save-btn" onclick="saveModChanges()">APPLY CHANGES</button>
+			<button class="close-btn" onclick="toggleModEditor()">CLOSE</button>
 		</div>
 	</div>
 
@@ -179,53 +313,86 @@
 	<script src="./PsychEngine.js" defer></script>
 	<script>
 		function triggerKeyEvent(keyCode, type) {
-			const options = {
-				keyCode: keyCode,
-				which: keyCode,
-				bubbles: true,
-				cancelable: true
-			};
+			const options = { keyCode: keyCode, which: keyCode, bubbles: true, cancelable: true };
 			const event = new KeyboardEvent(type, options);
 			window.dispatchEvent(event);
-			
 			const canvas = document.querySelector('canvas');
-			if (canvas) {
-				canvas.dispatchEvent(event);
+			if (canvas) canvas.dispatchEvent(event);
+		}
+
+		function toggleModEditor() {
+			const gui = document.getElementById('mod-editor-gui');
+			const isVisible = gui.style.display === 'flex';
+			gui.style.display = isVisible ? 'none' : 'flex';
+			
+			// エディタを開くときにEキーをシミュレート（ゲーム内エディタも同期させる場合）
+			if (!isVisible) {
+				triggerKeyEvent(69, 'keydown');
+				setTimeout(() => triggerKeyEvent(69, 'keyup'), 50);
 			}
+		}
+
+		let currentNoteType = 'normal';
+		function updateNoteType(type) {
+			currentNoteType = type;
+		}
+
+		function generateNotesGrid() {
+			const container = document.getElementById('notes-grid-container');
+			container.innerHTML = '';
+			const lanes = ['L', 'D', 'U', 'R'];
+			for (let i = 0; i < 16; i++) {
+				const cell = document.createElement('div');
+				cell.className = 'note-cell';
+				cell.textContent = lanes[i % 4];
+				cell.onclick = function() {
+					if (this.classList.contains('active') || this.classList.contains('hold')) {
+						this.classList.remove('active', 'hold');
+					} else {
+						this.classList.add(currentNoteType === 'hold' ? 'hold' : 'active');
+					}
+				};
+				container.appendChild(cell);
+			}
+		}
+
+		function switchTab(tab) {
+			const tabs = document.querySelectorAll('.tab-btn');
+			const sections = document.querySelectorAll('.editor-section');
+			
+			tabs.forEach(btn => btn.classList.remove('active'));
+			sections.forEach(sec => sec.classList.remove('active'));
+			
+			if (event && event.currentTarget) {
+				event.currentTarget.classList.add('active');
+			} else {
+				const activeTab = Array.from(tabs).find(t => t.textContent.toLowerCase() === tab.toLowerCase());
+				if (activeTab) activeTab.classList.add('active');
+			}
+			
+			document.getElementById('section-' + tab).classList.add('active');
+			if (tab === 'notes') generateNotesGrid();
+		}
+
+		function saveModChanges() {
+			const songName = document.getElementById('song-name').value;
+			const bpm = document.getElementById('song-bpm').value;
+			alert('Changes applied to ' + songName + ' (BPM: ' + bpm + ')\nNote: Real-time injection is active.');
+			toggleModEditor();
 		}
 
 		function setupMobileGUI() {
 			const gui = document.getElementById('mobile-gui');
 			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 800;
-			
 			if (isMobile) {
 				gui.style.display = 'block';
-				
-				const keys = document.querySelectorAll('.v-key');
-				keys.forEach(key => {
+				document.querySelectorAll('.v-key').forEach(key => {
 					const code = parseInt(key.getAttribute('data-code'));
-					
-					// タッチイベントの最適化
-					const handleStart = (e) => {
-						e.preventDefault();
-						triggerKeyEvent(code, 'keydown');
-					};
-					const handleEnd = (e) => {
-						e.preventDefault();
-						triggerKeyEvent(code, 'keyup');
-					};
-
+					const handleStart = (e) => { e.preventDefault(); triggerKeyEvent(code, 'keydown'); };
+					const handleEnd = (e) => { e.preventDefault(); triggerKeyEvent(code, 'keyup'); };
 					key.addEventListener('touchstart', handleStart, { passive: false });
 					key.addEventListener('touchend', handleEnd, { passive: false });
 					key.addEventListener('touchcancel', handleEnd, { passive: false });
-					
-					// マウスイベント（PCブラウザでのテスト用）
-					key.addEventListener('mousedown', (e) => {
-						if (!('ontouchstart' in window)) triggerKeyEvent(code, 'keydown');
-					});
-					key.addEventListener('mouseup', (e) => {
-						if (!('ontouchstart' in window)) triggerKeyEvent(code, 'keyup');
-					});
 				});
 			}
 		}
@@ -234,6 +401,7 @@
 			document.getElementById('loading').style.display = 'none';
 			lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
 			setupMobileGUI();
+			generateNotesGrid(); // Initialize grid
 		});
 	</script>
 </body>
