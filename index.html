@@ -22,18 +22,19 @@
 			padding: 0; 
 			height: 100%; 
 			overflow: hidden;
+			background: #000;
 			-webkit-tap-highlight-color: transparent;
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
 			user-select: none;
 		}
 		#openfl-content { 
-			background: #000; 
 			width: 100%; 
 			height: 100%;
 			position: fixed;
 			top: 0;
 			left: 0;
+			z-index: 1;
 		}
 		canvas {
 			display: block;
@@ -43,34 +44,93 @@
 			image-rendering: -webkit-optimize-contrast;
 			image-rendering: crisp-edges;
 		}
-		@font-face {
-			font-family: 'Pixel Arial 11 Bold';
-			src: url('assets/fonts/pixel.otf') format('opentype');
-			font-weight: normal;
-			font-style: normal;
-			font-display: swap;
+
+		/* 仮想キーボードGUI */
+		#mobile-gui {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 1000;
+			pointer-events: none;
+			display: none;
 		}
-		@font-face {
-			font-family: 'VCR OSD Mono';
-			src: url('assets/fonts/vcr.ttf') format('truetype');
-			font-weight: normal;
-			font-style: normal;
-			font-display: swap;
+
+		.gui-panel {
+			position: absolute;
+			pointer-events: auto;
+			display: flex;
+			flex-wrap: wrap;
 		}
-		@font-face {
-			font-family: 'Nokia Cellphone FC Small';
-			src: url('flixel/fonts/nokiafc22.ttf') format('truetype');
-			font-weight: normal;
-			font-style: normal;
-			font-display: swap;
+
+		/* 十字キー（左側） */
+		#dpad-panel {
+			bottom: 40px;
+			left: 30px;
+			width: 190px;
+			height: 190px;
 		}
-		@font-face {
-			font-family: 'Monsterrat';
-			src: url('flixel/fonts/monsterrat.ttf') format('truetype');
-			font-weight: normal;
-			font-style: normal;
-			font-display: swap;
+
+		/* アクションボタン（右側） */
+		#action-panel {
+			bottom: 40px;
+			right: 30px;
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 10px;
 		}
+
+		/* 特殊キー（上部） */
+		#special-panel {
+			top: 15px;
+			left: 15px;
+			display: flex;
+			gap: 12px;
+		}
+
+		.v-key {
+			background: rgba(255, 255, 255, 0.15);
+			border: 2px solid rgba(255, 255, 255, 0.4);
+			color: #fff;
+			border-radius: 12px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'VCR OSD Mono', sans-serif;
+			font-weight: bold;
+			cursor: pointer;
+			touch-action: manipulation;
+			transition: background 0.1s, transform 0.05s;
+		}
+
+		.v-key:active {
+			background: rgba(255, 255, 255, 0.4);
+			transform: scale(0.95);
+		}
+
+		/* 十字キーの個別配置 */
+		.d-key { width: 55px; height: 55px; position: absolute; }
+		#key-up { top: 0; left: 60px; }
+		#key-down { bottom: 0; left: 60px; }
+		#key-left { top: 60px; left: 0; }
+		#key-right { top: 60px; right: 0; }
+
+		/* アクションボタンのスタイル */
+		.a-key { 
+			width: 85px; 
+			height: 60px; 
+			font-size: 13px;
+			background: rgba(255, 255, 255, 0.1);
+		}
+
+		/* 特殊ボタン（Eキーなど） */
+		.s-key {
+			padding: 8px 15px;
+			font-size: 12px;
+			background: rgba(0, 0, 0, 0.5);
+		}
+
 		#loading {
 			position: fixed;
 			top: 0;
@@ -85,69 +145,95 @@
 			font-family: Arial, sans-serif;
 			z-index: 9999;
 		}
-		/* モバイル用エディタ呼び出しボタン（最小限） */
-		#editor-btn {
-			position: fixed;
-			top: 5px;
-			left: 5px;
-			padding: 8px 12px;
-			background: rgba(0, 0, 0, 0.4);
-			color: rgba(255, 255, 255, 0.7);
-			border: 1px solid rgba(255, 255, 255, 0.3);
-			border-radius: 4px;
-			font-family: 'VCR OSD Mono', sans-serif;
-			font-size: 12px;
-			z-index: 1000;
-			cursor: pointer;
-			display: none;
-			touch-action: manipulation;
-		}
-		#editor-btn:active {
-			background: rgba(255, 255, 255, 0.3);
-		}
 	</style>
 </head>
 <body>
-	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript>
 	<div id="loading">Loading...</div>
-	<div id="editor-btn">EDITOR (E)</div>
+	
+	<!-- 仮想キーボードGUI -->
+	<div id="mobile-gui">
+		<!-- 左側：十字キー -->
+		<div id="dpad-panel" class="gui-panel">
+			<div class="v-key d-key" id="key-up" data-code="38">↑</div>
+			<div class="v-key d-key" id="key-down" data-code="40">↓</div>
+			<div class="v-key d-key" id="key-left" data-code="37">←</div>
+			<div class="v-key d-key" id="key-right" data-code="39">→</div>
+		</div>
+
+		<!-- 右側：決定・キャンセル -->
+		<div id="action-panel" class="gui-panel">
+			<div class="v-key a-key" id="key-enter" data-code="13">ENTER</div>
+			<div class="v-key a-key" id="key-esc" data-code="27">ESC</div>
+			<div class="v-key a-key" id="key-shift" data-code="16">SHIFT</div>
+			<div class="v-key a-key" id="key-space" data-code="32">SPACE</div>
+		</div>
+
+		<!-- 上部：特殊キー -->
+		<div id="special-panel" class="gui-panel">
+			<div class="v-key s-key" id="key-e" data-code="69">EDITOR (E)</div>
+		</div>
+	</div>
+
 	<div id="openfl-content"></div>
+
 	<script src="./PsychEngine.js" defer></script>
 	<script>
-		function pressKey(keyCode) {
+		function triggerKeyEvent(keyCode, type) {
 			const options = {
 				keyCode: keyCode,
 				which: keyCode,
 				bubbles: true,
 				cancelable: true
 			};
-			const down = new KeyboardEvent('keydown', options);
-			const up = new KeyboardEvent('keyup', options);
-			window.dispatchEvent(down);
-			setTimeout(() => window.dispatchEvent(up), 50);
+			const event = new KeyboardEvent(type, options);
+			window.dispatchEvent(event);
 			
-			// 一部のブラウザ/エンジン向けにcanvasにも直接送る
 			const canvas = document.querySelector('canvas');
 			if (canvas) {
-				canvas.dispatchEvent(new KeyboardEvent('keydown', options));
-				setTimeout(() => canvas.dispatchEvent(new KeyboardEvent('keyup', options)), 50);
+				canvas.dispatchEvent(event);
+			}
+		}
+
+		function setupMobileGUI() {
+			const gui = document.getElementById('mobile-gui');
+			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 800;
+			
+			if (isMobile) {
+				gui.style.display = 'block';
+				
+				const keys = document.querySelectorAll('.v-key');
+				keys.forEach(key => {
+					const code = parseInt(key.getAttribute('data-code'));
+					
+					// タッチイベントの最適化
+					const handleStart = (e) => {
+						e.preventDefault();
+						triggerKeyEvent(code, 'keydown');
+					};
+					const handleEnd = (e) => {
+						e.preventDefault();
+						triggerKeyEvent(code, 'keyup');
+					};
+
+					key.addEventListener('touchstart', handleStart, { passive: false });
+					key.addEventListener('touchend', handleEnd, { passive: false });
+					key.addEventListener('touchcancel', handleEnd, { passive: false });
+					
+					// マウスイベント（PCブラウザでのテスト用）
+					key.addEventListener('mousedown', (e) => {
+						if (!('ontouchstart' in window)) triggerKeyEvent(code, 'keydown');
+					});
+					key.addEventListener('mouseup', (e) => {
+						if (!('ontouchstart' in window)) triggerKeyEvent(code, 'keyup');
+					});
+				});
 			}
 		}
 
 		window.addEventListener('load', function() {
 			document.getElementById('loading').style.display = 'none';
 			lime.embed("PsychEngine", "openfl-content", 1280, 720, { parameters: {} });
-			
-			const editorBtn = document.getElementById('editor-btn');
-			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 800;
-			
-			if (isMobile) {
-				editorBtn.style.display = 'block';
-				editorBtn.addEventListener('touchstart', function(e) {
-					e.preventDefault();
-					pressKey(69); // E key
-				});
-			}
+			setupMobileGUI();
 		});
 	</script>
 </body>
